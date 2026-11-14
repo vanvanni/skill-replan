@@ -1,0 +1,4 @@
+interface:
+  display_name: "RePlan"
+  short_description: "Prepare packs, then launch separate T3 supervisors"
+  default_prompt: "Use $replan to prepare purpose-specific packs from our meeting. Keep execution in a separate supervisor thread; launch it only when I request it."

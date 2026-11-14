@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.replan-local/
+.powerplan-local/
+.venv/
+*.zip

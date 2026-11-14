@@ -1,0 +1,39 @@
+name: Validate RePlan
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  skill-discovery:
+    name: Skills CLI discovery
+    runs-on: ubuntu-latest
+    env:
+      DISABLE_TELEMETRY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Discover the RePlan skill
+        run: npx --yes skills@1.8.1 add . --list
+
+  helper-tests:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run behavioral tests
+        run: python -B -m unittest discover -s scripts -p "test_*.py" -v
