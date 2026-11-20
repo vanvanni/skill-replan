@@ -32,6 +32,12 @@ If the owner already selected a different model or runtime, preserve that select
 
 > Resume this project from its saved checkpoint in the same supervisor. Reconcile interrupted work and actual harness/runtime outcomes before replaying anything. Preserve scope and model settings, recheck preflight, re-enable the single existing continuation and continue toward the agreed review milestone.
 
+## Review a candidate and make targeted changes
+
+> Review this candidate against the approved acceptance and project engineering contracts. Give requirement and engineering findings stable IDs with evidence, and distinguish blockers from suggestions. For the changes I request, update only affected decisions/tasks, fix small findings directly, and recheck affected behavior. Broaden review only where the change invalidates prior proof or changes risk. Preserve the owner review stop and full-release boundary.
+
+See [review and targeted changes](review.md). This request does not itself authorize reopening a stopped owner milestone.
+
 ## Add scope while work is running
 
 > Add this requirement to the authoritative scope and FA/PA mapping. Assess contract, dependency, test and first-review impact. Preserve existing acceptance and live ownership, checkpoint the change, then continue ready authorized work. Do not restart the project or duplicate current workers.

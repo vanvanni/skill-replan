@@ -40,6 +40,10 @@ When a delegation call's outcome is unknown, keep its reservation. Follow T3's r
 
 ## Exact-candidate review
 
-Review the smallest substantive candidate that changes risk. Worker success is implemented, not automatically integrated/verified. Assign reviewers disjoint new test/evidence paths and an actual candidate; they do not alter shared acceptance or ownership. Preserve findings and failed proof. Supervisor fixes small findings; substantial fixes get a new bounded independent review where justified.
+Follow [review and targeted changes](review.md) for separate requirement/engineering findings, stable finding IDs and change-focused rechecks. Worker success is implemented, not automatically integrated/verified. Assign reviewers disjoint new test/evidence paths and an actual candidate; they do not alter shared acceptance or ownership.
 
 Before the first review stop, demonstrate the agreed real user journeys, provide private launch/access instructions, identify the exact commit/binary and limitations, and retain full release tasks. Never use the milestone to reduce full product scope. Never publish or deploy to production merely because a local review build exists.
+
+## Return useful progress
+
+Explain what now works, its evidence and practical limits, the next visible behavior, and any specific blocker. Prefer artifact links and observed outcomes over planning-document inventories. Do not invent a completion date. On first review include the exact private candidate, access instructions, verified journeys, remaining scope and explicit paused state.

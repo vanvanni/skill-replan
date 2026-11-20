@@ -20,6 +20,8 @@ continue independent owned work when useful. No live source modification.
 
 Acceptance and required native checks: <observable cases and commands>.
 Review scope/exclusions: <specific boundaries, without waiving parent scope>.
+For review: <base/candidate, requirement and engineering sources, finding IDs>.
+For changes: <requested outcome/findings, affected behavior, targeted rechecks>.
 Authorization: <local actions allowed; external actions excluded or approved>.
 Retry budget: <diagnosed attempts, normally three>.
 Keep credentials out of prompts/evidence/Git.

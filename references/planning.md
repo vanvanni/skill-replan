@@ -2,6 +2,8 @@
 
 ## Intake from a long discussion
 
+For consequential ambiguity, use [clarification](clarification.md): inspect evidence, test a concrete scenario, resolve the material question and capture the decision. Reuse the project's glossary and decision records; do not restart a settled interview.
+
 Apply [meeting and supervisor handoff](meeting.md): prepare in the meeting and execute in a separately launched supervisor. Identify the pack's intended purpose before deriving tasks. Separate research and implementation packs when requested; do not treat research completion as permission to begin implementation.
 
 Read the current conversation, project instructions and supplied research. Extract the desired product, users, retained capabilities, deliberate exclusions, technology/runtime constraints, sources and pins, UX/brand inputs, external integrations, migration requirements, validation environments, authorization and first-review outcome. Distinguish owner decisions, verified facts, hypotheses and unresolved questions. Resolve routine choices from context. Ask only questions whose answers change scope, access, cost or irreversible action.
@@ -9,6 +11,22 @@ Read the current conversation, project instructions and supplied research. Extra
 Do not treat a reference project's implementation or this skill as stronger than the owner's scope. For greenfield work, source parity and migration may be inapplicable. For rewrites, preserve required public behavior and inspect source/tests; keep reference foundations read-only and pinned. Record review decisions for candidate dependencies and skills before adopting them. No blanket install of optional packages or skills.
 
 ## Files produced
+
+### Create or adopt the workspace
+
+Use `replan/` beneath the selected execution workspace and `RUN_STATE.json` at its root. Separate purpose packs must have separate state and binding; see [meeting workspace choices](meeting.md). New tasks use `PA-01`, features use `FA-01`, and task slices may use `PA-12.1`.
+
+Initialize a new pack with the bundled standard-library Python helper:
+
+```text
+python <skill>/scripts/replan.py init --workspace <project> --name "Project name"
+python <project>/replan/tools/replan.py validate --workspace <project>
+python <project>/replan/tools/replan.py ready --workspace <project>
+```
+
+`init` refuses existing packs/state and creates a stopped draft, not an authorized run or fabricated backlog. Populate the actual scope, acceptance, tasks, pins and first-review/full-release boundaries from the discussion. Empty registers are valid only in draft. The helper never calls T3 or starts agents. After initialization use the project's hash-pinned helper; review and repin deliberate upgrades. Preserve existing `AGENTS.md` and `.gitignore`, merging the generated fragment and local ignore rule when needed. See [helper operations](helper.md).
+
+When adopting, preserve existing paths, IDs, instructions, evidence, tools and supervisor binding. Never reinitialize or renumber an existing project. The bundled helper implements PA/FA; an existing CB or other schema retains its native validator/coordinator and needs a reviewed adapter. Do not feed incompatible state to this helper or silently rename it.
 
 The helper generates the layout and document headings. Fill the documents with project-specific decisions rather than maintaining generic placeholder prose.
 

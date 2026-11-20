@@ -3,4 +3,5 @@ __pycache__/
 .replan-local/
 .powerplan-local/
 .venv/
+.agent-tests/
 *.zip

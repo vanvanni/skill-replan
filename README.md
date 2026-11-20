@@ -107,6 +107,8 @@ python -B -m unittest discover -s scripts -p "test_*.py" -v
 
 Tests use temporary projects and synthetic harness receipts. They do not launch agents, schedules or application runtimes. GitHub Actions runs the same suite on Windows and Linux with Python 3.11 and 3.14; remote CI results are separate from local validation.
 
+Optional agent-behavior checks cover mode selection, clarification and targeted review changes. See [the local case protocol](references/agent-tests.md). Keep their fixtures, transcripts and generated workspaces under gitignored `.agent-tests/`; they can remain entirely local and are not required by CI. Prepared cases do not count as passed evaluations.
+
 Check that the Skills CLI discovers the package without installing it:
 
 ```sh

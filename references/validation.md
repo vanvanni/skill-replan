@@ -14,7 +14,7 @@ The skill-creator metadata validator can also be used when available. Its PyYAML
 
 ## Meeting boundary checks
 
-After the meeting/supervisor update and RePlan rebrand, all 49 helper tests, skill metadata validation and local Markdown link checks pass. A freshly initialized purpose workspace includes `KICKOFF.md` and remains draft/stopped with no binding, jobs or schedule.
+The current 49 helper tests, skill metadata validation and local Markdown link checks pass. A freshly initialized purpose workspace includes `KICKOFF.md` and remains draft/stopped with no binding, jobs or schedule.
 
 The thread-role boundary is an agent instruction, not a harness permission or a helper-enforced identity check. The helper has no live thread context. These conversation behaviors still require live qualification:
 
@@ -23,6 +23,10 @@ The thread-role boundary is an agent instruction, not a harness permission or a 
 - A request to run in the meeting is redirected to a prepared separate-supervisor handoff.
 - An explicit separate-thread launch request launches only the selected purpose; the new supervisor executes without asking again for already supplied authorization.
 - A bound supervisor resumes in place, and research completion does not start implementation.
+
+## Optional agent-behavior checks
+
+Follow [the local case protocol](agent-tests.md) when evaluating routing, clarification or review behavior. Store optional fixtures and runs in gitignored `.agent-tests/`; they are not part of helper tests, CI or published qualification. The protocol remains available in a clean clone without requiring private fixtures. Cases that have only been prepared are **not run** and establish no behavioral pass.
 
 ## Remaining live gates
 
