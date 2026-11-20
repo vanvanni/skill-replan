@@ -1,6 +1,6 @@
 # Validation and qualification
 
-The local helper requires **Python 3.11+** and uses only the standard library. Its **49 behavioral tests pass** on Windows with Python 3.14. Skill metadata, Python syntax, local documentation links and a freshly generated project's pinned validator also pass.
+The local helper requires **Python 3.11+** and uses only the standard library. Its **53 behavioral tests pass** on Windows with Python 3.14. Skill metadata, Python syntax, local documentation links and a freshly generated project's pinned validator also pass.
 
 From the skill folder, run:
 
@@ -8,13 +8,13 @@ From the skill folder, run:
 python -B -m unittest discover -s scripts -p "test_*.py" -v
 ```
 
-The tests cover scope/feature/task contracts, dependency milestones, exact-candidate evidence, source/asset/tool locks, isolated ownership, parallel reservations, strict JSON, atomic state replacement, cross-process leases, interrupted work, scheduler receipt bookkeeping, explicit pause/resume, review advancement, full release, runtime settlement, bounded retries and refusal to modify legacy packs. Temporary synthetic projects and fake harness receipts are used; no agents, schedules or application runtimes are launched.
+The tests cover scope/feature/task contracts, dependency milestones, exact-candidate evidence, source/asset/tool locks, isolated ownership, parallel reservations, strict JSON, atomic state replacement, cross-process leases, interrupted work, scheduler receipt bookkeeping, explicit pause/resume, review advancement, full release, runtime settlement, bounded retries and refusal to modify legacy packs. Progress checks also cover state preservation, unknown work, verification counts, retry blockers, HTML escaping and overwrite refusal. Temporary synthetic projects and fake harness receipts are used; no agents, schedules or application runtimes are launched.
 
 The skill-creator metadata validator can also be used when available. Its PyYAML dependency is for that maintainer tool only; the skill helper has no third-party runtime dependencies.
 
 ## Meeting boundary checks
 
-The current 49 helper tests, skill metadata validation and local Markdown link checks pass. A freshly initialized purpose workspace includes `KICKOFF.md` and remains draft/stopped with no binding, jobs or schedule.
+The current 53 helper tests, skill metadata validation and local Markdown link checks pass. A freshly initialized purpose workspace includes `KICKOFF.md` and remains draft/stopped with no binding, jobs or schedule.
 
 The thread-role boundary is an agent instruction, not a harness permission or a helper-enforced identity check. The helper has no live thread context. These conversation behaviors still require live qualification:
 

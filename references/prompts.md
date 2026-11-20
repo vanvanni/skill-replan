@@ -26,11 +26,21 @@ If the owner already selected a different model or runtime, preserve that select
 
 ## Pause
 
+Shortcut: `/replan pause` (Claude), `$replan pause` (Codex), or optional registered `/pause` alias. This records the same owner intent and runs the full stop protocol.
+
 > Pause this project for tonight. Persist the stop flag, disable the recorded continuation, safely settle or cancel workers and runtime jobs, preserve partial work, and update the handoff with exact commits, evidence, lab state and next steps. Confirm when it is safe to close the harness. Stay paused until I explicitly resume.
 
 ## Resume
 
+Shortcut: `/replan resume` (Claude), `$replan resume` (Codex), or optional registered `/replan-resume` alias. The harness's built-in `/resume` is not a RePlan phase transition.
+
 > Resume this project from its saved checkpoint in the same supervisor. Reconcile interrupted work and actual harness/runtime outcomes before replaying anything. Preserve scope and model settings, recheck preflight, re-enable the single existing continuation and continue toward the agreed review milestone.
+
+## Progress
+
+Shortcut: `/replan progress` (Claude), `$replan progress` (Codex), or optional registered `/progress` alias. See [commands and progress](commands.md).
+
+> Show a read-only visual snapshot for this pack: verified outcomes, current recorded work, blockers and unknown effects, continuation state and the next action. Include the snapshot time and distinguish stored state from fresh observations. Keep the run paused if paused; do not poll or launch anything.
 
 ## Review a candidate and make targeted changes
 

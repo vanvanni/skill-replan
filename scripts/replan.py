@@ -585,16 +585,49 @@ def settlement(state):
     return {"safe_to_close": not blockers, "blockers": blockers}
 
 
+def progress(scope, tasks, features, state):
+    """Read-only snapshot; stored job status is not a live harness observation."""
+    guard = decision(scope, tasks, state)
+    ready = ready_tasks(tasks, state)
+    counts = {status: sum(t["status"] == status for t in tasks.values()) for status in sorted(STATUSES)}
+    jobs = [{"task": j["pa_task"], "title": tasks.get(j["pa_task"], {}).get("title", j["pa_task"]),
+             "status": j["status"], "link": j.get("link"), "key": j["key"]} for j in live(state)]
+    latest_attempts = {(a["pa_task"], a["blocker"]): a for a in state.get("attempts", [])}
+    retry_blockers = [{"id": a["pa_task"], "title": tasks.get(a["pa_task"], {}).get("title", a["pa_task"]),
+                       "blocker": a["blocker"] + ": retry budget exhausted"} for a in latest_attempts.values()
+                      if a.get("result") == "failed" and a.get("failure_count", 0) >= 3]
+    return {"name": scope["name"], "snapshot_utc": now(), "source": "stored pack; not live monitoring",
+            "revision": state["revision"], "last_event_utc": state["events"][-1].get("recorded_utc") if state["events"] else None,
+            "phase": state["phase"], "delivery_stage": state.get("delivery_stage", "first_review"),
+            "stop_requested": state["stop_requested"], "review_status": state["review_status"],
+            "guard": guard, "task_counts": counts, "task_total": len(tasks),
+            "feature_verified": sum(f["status"] == "verified" for f in features.values()), "feature_total": len(features),
+            "jobs": jobs,
+            "in_progress_tasks": [{"id": t["id"], "title": t["title"]} for t in tasks.values() if t["status"] == "in_progress"],
+            "blocked_tasks": [{"id": t["id"], "title": t["title"], "blocker": t.get("blocker", "See HANDOFF.md")} for t in tasks.values() if t["status"] == "blocked"] + retry_blockers,
+            "dependency_ready_tasks": ready,
+            "schedule": dict(state["schedule"]), "settlement": settlement(state),
+            "handoff": state.get("handoff"), "supervisor": state.get("binding"),
+            "next_action": ("Await explicit owner phase decision" if state["review_status"] == "awaiting_review" else
+                            "Remain stopped; inspect settlement and owner instructions" if guard["decision"] == "stop" else
+                            guard.get("reason") or
+                            ("Await completion notifications; worker budget is full" if guard.get("free_slots", 0) == 0 else
+                             "Work eligible tasks within the guard and worker budget" if ready else
+                             "Await completion notifications" if jobs else "Inspect remaining acceptance and blockers; no dependency-ready work"))}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["init", "validate", "ready", "guard", "bind", "bind-t3", "authorize", "preflight", "runner-ready", "pause", "resume", "advance", "finish", "review", "checkpoint", "reserve", "attach", "terminal", "resolve-reservation", "schedule-intent", "schedule-record", "schedule-resolve", "continuation", "runtime-record", "runtime-audit", "settlement", "attempt"])
+    parser.add_argument("command", choices=["init", "validate", "ready", "guard", "progress", "bind", "bind-t3", "authorize", "preflight", "runner-ready", "pause", "resume", "advance", "finish", "review", "checkpoint", "reserve", "attach", "terminal", "resolve-reservation", "schedule-intent", "schedule-record", "schedule-resolve", "continuation", "runtime-record", "runtime-audit", "settlement", "attempt"])
     parser.add_argument("--workspace", required=True, type=Path)
     parser.add_argument("--name")
     parser.add_argument("--input", type=Path, help="JSON receipt/batch file; never put secrets here")
     parser.add_argument("--instruction", type=Path, help="File containing the actual owner instruction")
     parser.add_argument("--scheduled", action="store_true", help="Apply conservative scheduled-wake guard")
+    parser.add_argument("--html", type=Path, help="Progress only: create a new HTML snapshot artifact")
     args = parser.parse_args(argv)
     try:
+        require(args.html is None or args.command == "progress", "--html is only supported for progress")
         require(not (args.workspace / "powerplan").exists(),
                 "Legacy powerplan pack: use its pinned powerplan/tools/powerplan.py; do not reinitialize or rename it")
         if args.command == "init":
@@ -621,6 +654,14 @@ def main(argv=None):
                     result = {"scope": scope["status"], "dependency_ready_tasks": ready_tasks(tasks, state), "guard": decision(scope, tasks, state)}
                 elif args.command == "guard":
                     result = decision(scope, tasks, state, args.scheduled)
+                elif args.command == "progress":
+                    result = progress(scope, tasks, features, state)
+                    if args.html:
+                        # Exclusive creation prevents status output overwriting any
+                        # existing source, plan, state, lock or evidence file.
+                        with args.html.open("x", encoding="utf-8") as output:
+                            output.write(contracts.render_progress(result))
+                        result["html"] = str(args.html.resolve())
                 elif args.command == "continuation":
                     result = {"prompt": contracts.render_prompt(root, state), "schedule_id": state["schedule"]["id"]}
                 elif args.command == "settlement":

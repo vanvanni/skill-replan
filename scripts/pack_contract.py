@@ -2,12 +2,58 @@
 from __future__ import annotations
 
 import hashlib
+from html import escape
 import json
 from pathlib import Path
 import re
 
 
 REQUIRED_TOOLS = ("tools/replan.py", "tools/pack_contract.py")
+
+
+def render_progress(snapshot):
+    """Self-contained, script-free snapshot. All pack text is untrusted HTML."""
+    def e(value):
+        return escape(str(value), quote=True)
+
+    def rows(items, empty):
+        return "<ul>" + "".join("<li>" + item + "</li>" for item in items) + "</ul>" if items else "<p class='muted'>" + e(empty) + "</p>"
+
+    counts = snapshot["task_counts"]
+    total, verified = snapshot["task_total"], counts["verified"]
+    percent = round(verified / total * 100) if total else 0
+    jobs = []
+    for job in snapshot["jobs"]:
+        label = e(job["task"]) + " · " + e(job["title"])
+        link = job.get("link")
+        if isinstance(link, str) and link.startswith(("https://", "http://")):
+            label = '<a href="' + e(link) + '">' + label + '</a>'
+        jobs.append(label + " <span class='badge'>" + ("recorded running" if job["status"] == "running" else "unresolved · " + e(job["status"])) + "</span>")
+    tracked = {j["task"] for j in snapshot["jobs"]}
+    jobs += [e(t["id"]) + " · " + e(t["title"]) + " <span class='badge'>in progress in register</span>" for t in snapshot["in_progress_tasks"] if t["id"] not in tracked]
+    blockers = [e(t["id"]) + " · " + e(t["title"]) + ": " + e(t["blocker"]) for t in snapshot["blocked_tasks"]]
+    blockers += [e(j["task"]) + ": unresolved external outcome" for j in snapshot["jobs"] if j["status"] != "running"]
+    schedule = snapshot["schedule"]
+    if schedule.get("intent"):
+        blockers.append("Schedule creation outcome unresolved")
+    guard = snapshot["guard"]
+    eligible = ", ".join(snapshot["dependency_ready_tasks"]) or "None"
+    status_counts = " · ".join(e(key.replace("_", " ")) + " " + str(counts[key]) for key in ("planned", "in_progress", "implemented", "verified", "blocked"))
+    schedule_label = "enabled" if schedule["enabled"] else "disabled / none"
+    schedule_label += " · " + str(schedule.get("id") or "no recorded ID")
+    return '''<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>RePlan progress</title>
+<style>
+:root{color-scheme:light dark;--foreground:light-dark(#172c28,#e2eee9);--muted:light-dark(#53665e,#a1b4ac);--card:light-dark(#f2f6f3,#15251f);--border:light-dark(#cad8ce,#344c40);--primary:light-dark(#216447,#8bd5a7);--radius:12px;--font-sans:system-ui,sans-serif}
+body{font-family:var(--font-sans);color:var(--foreground);margin:0}h1{font-size:24px;margin:0 0 6px}h2{font-size:16px;margin:0 0 12px}p{margin:6px 0;line-height:1.5}.muted,small{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}.wide{grid-column:1/-1}.badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:2px 6px;margin:3px 0}progress{width:100%;height:18px;accent-color:var(--primary)}ul{padding-left:20px;margin:0}li{margin:8px 0;overflow-wrap:anywhere}a{color:var(--primary)}.number{font-size:30px;font-weight:650}
+</style></head><body>
+''' + f'''<h1>{e(snapshot['name'])}</h1><p class="muted">Snapshot {e(snapshot['snapshot_utc'])} · stored state, not live monitoring</p>
+<p><span class="badge">{e(snapshot['phase'])}</span> <span class="badge">{e(snapshot['delivery_stage'])}</span> <span class="badge">guard: {e(guard['decision'])}</span> <span class="badge">stop: {e(snapshot['stop_requested'])}</span> <span class="badge">review: {e(snapshot['review_status'])}</span></p>
+<div class="grid"><section class="card wide"><h2>Verified outcomes</h2><p><span class="number">{verified} / {total}</span> tasks · {snapshot['feature_verified']} / {snapshot['feature_total']} features</p><progress value="{verified}" max="{max(1,total)}" aria-label="Verified tasks">{percent}%</progress><p class="muted">{status_counts}</p><small>Unweighted task counts; not an effort estimate.</small></section>
+<section class="card"><h2>Current recorded work</h2>{rows(jobs, 'No work recorded as active.')}<p class="muted">Stored running status is not a fresh worker observation.</p></section>
+<section class="card"><h2>Blockers and unknowns</h2>{rows(blockers, 'No explicit task blockers recorded.')}<p>{e(guard.get('reason', 'Execution guard permits bounded work.'))}</p></section>
+<section class="card"><h2>Next action</h2><p>{e(snapshot['next_action'])}</p><p class="muted">Dependency-ready: {e(eligible)}. Readiness alone grants no execution permission.</p></section>
+<section class="card"><h2>Continuation and settlement</h2><p>{e(schedule_label)}</p><p>Safe to close: {e(snapshot['settlement']['safe_to_close'])}</p>{rows([e(x) for x in snapshot['settlement']['blockers']], 'Settlement checks satisfied.')}<p class="muted">State revision {snapshot['revision']} · last event {e(snapshot['last_event_utc'] or 'none')}</p></section></div></body></html>'''
 
 
 DOCUMENTS = {

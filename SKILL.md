@@ -9,6 +9,8 @@ Turn the owner's discussion into durable project instructions, then deliver the 
 
 ## Select the mode
 
+For short controls use `replan pause`, `replan resume` or `replan progress` through the harness's skill invocation syntax. Read [commands and progress](references/commands.md) for slash aliases, target selection and the visual read-only status view. These controls preserve the mode and stop boundaries below.
+
 Read only the references needed for the current action. A discussion about RePlan itself does not start a project run.
 
 | Mode | Entry and required guidance | Result / boundary |

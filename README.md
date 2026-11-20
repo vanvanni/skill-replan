@@ -74,6 +74,12 @@ then stop for my review. Do not begin implementation.
 
 See [invocation examples](references/prompts.md), [the meeting handoff](references/meeting.md) and the [Tiny Notes trial](examples/tiny-notes/DISCUSS.md).
 
+## Short controls
+
+Use `/replan pause`, `/replan resume`, or `/replan progress` in Claude Code; use `$replan pause`, `$replan resume`, or `$replan progress` in Codex. Progress shows a visual snapshot of verified outcomes, recorded current work, blockers, continuation and the next action. Terminal clients receive a compact text view.
+
+Optional Claude aliases for `/pause`, `/replan-resume` and `/progress` are in `commands/claude/`; copy them into your target project's `.claude/commands/` after checking for name conflicts. Keep built-in `/resume` for conversation selection. Bare slash aliases require harness registration; T3 and other clients may need their skill picker or `Use RePlan: progress`. See [commands and progress](references/commands.md) for installation details and state boundaries. No aliases are installed globally by this package.
+
 ## What a pack contains
 
 Each execution workspace has a `replan/` directory and a workspace-root `RUN_STATE.json`. The pack includes scope and exclusions, feature acceptance, a task dependency graph, engineering contracts, source and tool locks, evidence, checkpoints and `KICKOFF.md` for the new supervisor. Task and feature identifiers retain the `PA-` and `FA-` formats.

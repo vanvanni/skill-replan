@@ -19,6 +19,7 @@ For receipt commands supply a JSON file using `--input <file>`; for owner action
 | `init --name "Name"` | Create draft registers/docs/state; refuses existing pack/state |
 | `validate` | Validate pack/state and exact-candidate evidence structure |
 | `ready` | Report dependency-ready tasks and execution guard separately |
+| `progress [--html <new-file>]` | Read-only JSON snapshot of phase, verified counts, recorded work, blockers, guard and settlement; optionally create a self-contained HTML artifact without overwriting an existing file |
 | `guard [--scheduled]` | Report stop/yield/bootstrap/ready and free slots |
 | `bind` | `{project_id, supervisor_thread_id, profile:{provider,model,options:{...}}}` from actual harness observation; existing binding cannot silently change |
 | `bind-t3` | `{project:<raw t3_project_read>,thread:<raw t3_thread_configure>}`; normalize real receipts, check workspace, preserve distinct pack and T3 project IDs |

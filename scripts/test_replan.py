@@ -83,6 +83,54 @@ class Workflow(unittest.TestCase):
         s, t, f, state = p.load_pack(self.root)
         self.assertEqual(p.decision(s, t, state)["decision"], "stop")
         self.assertFalse(state["schedule"]["enabled"])
+
+    def test_progress_cli_preserves_pack_and_pause(self):
+        before = {f.relative_to(self.root): f.read_bytes() for f in self.root.rglob("*") if f.is_file()}
+        artifact = Path(self.temp.name) / "progress.html"
+        result = subprocess.run([sys.executable, str(self.plan / "tools/replan.py"), "progress", "--workspace", str(self.root), "--html", str(artifact)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        status = json.loads(result.stdout)
+        self.assertEqual(status["guard"]["decision"], "stop")
+        self.assertTrue(status["stop_requested"])
+        self.assertEqual(status["task_total"], 0)
+        self.assertEqual(status["jobs"], [])
+        for relative, payload in before.items():
+            self.assertEqual((self.root / relative).read_bytes(), payload, str(relative))
+        self.assertIn("not live monitoring", artifact.read_text(encoding="utf-8"))
+
+    def test_progress_distinguishes_unknown_jobs_and_unverified_work(self):
+        scope, tasks, state = self.active()
+        p.reserve(scope, tasks, state, {"jobs": [self.job("PA-02")]})
+        _, tasks, features, _ = p.load_pack(self.root)
+        tasks["PA-03"]["status"] = "implemented"
+        state["attempts"] = [{"pa_task": "PA-04", "blocker": "native probe", "result": "failed", "failure_count": 3}]
+        result = p.progress(scope, tasks, features, state)
+        self.assertEqual(result["task_counts"]["verified"], 1)
+        self.assertEqual(result["task_counts"]["implemented"], 1)
+        self.assertEqual(result["guard"]["decision"], "yield")
+        self.assertNotEqual(result["jobs"][0]["status"], "running")
+        self.assertNotIn("PA-02", result["dependency_ready_tasks"])
+        self.assertEqual(result["feature_verified"], 0)
+        self.assertIn("retry budget exhausted", result["blocked_tasks"][0]["blocker"])
+
+    def test_progress_escapes_pack_text_and_unsafe_links(self):
+        scope, tasks, features, state = self.populated()
+        scope["name"] = '<script>alert("name")</script>'
+        status = p.progress(scope, tasks, features, state)
+        status["jobs"] = [{"task": "PA-02", "title": '<img src=x onerror="alert(1)">', "status": "running", "link": "javascript:alert(1)"}]
+        page = p.contracts.render_progress(status)
+        self.assertNotIn("<script>", page)
+        self.assertNotIn("<img", page)
+        self.assertNotIn("javascript:", page)
+        self.assertIn("&lt;script&gt;", page)
+        self.assertIn("recorded running", page)
+
+    def test_progress_html_cannot_overwrite_state(self):
+        state_path = self.root / "RUN_STATE.json"
+        before = state_path.read_bytes()
+        result = subprocess.run([sys.executable, str(self.plan / "tools/replan.py"), "progress", "--workspace", str(self.root), "--html", str(state_path)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(state_path.read_bytes(), before)
         with self.assertRaises(p.Invalid):
             p.initialize(self.root, "Overwrite")
 
